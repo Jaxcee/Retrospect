@@ -11,19 +11,19 @@ import java.util.Base64;
 public class UserJWT {
     private static final String SECRET = "retrospect";
 
-    public String generateToken(int userId) {
+    public String generateToken(Long userId) {
         return JWT.create()
                 .withClaim("userId" ,userId)
                 .sign(Algorithm.HMAC256(Base64.getEncoder().encode(SECRET.getBytes())));
     }
 
-    public int decodeToken(String token) {
+    public long decodeToken(String token) {
 
-            int userId = JWT.require(Algorithm.HMAC256(Base64.getEncoder().encode(SECRET.getBytes())))
+            long userId = JWT.require(Algorithm.HMAC256(Base64.getEncoder().encode(SECRET.getBytes())))
                     .build()
                     .verify(token)
                     .getClaim("userId")
-                    .asInt();
+                    .asLong();
             return userId;
 
 

@@ -26,32 +26,41 @@ public class UserService implements IUserService {
     UserJWT userJWT;
 
     @Override
+
     public String userSignup(SignUpDTO signUpDTO) {
-        String encryptedPassword=bCryptPasswordEncoder.encode(signUpDTO.getUserPassword());
-        signUpDTO.setUserPassword((encryptedPassword));
-        iUserRepository.save(userEntity);
+        // Create a new UserEntity instance
+        UserEntity userEntity = new UserEntity();
+
+        // Encrypt password
+        String encryptedPassword = bCryptPasswordEncoder.encode(signUpDTO.getUserPassword());
+
+        // Set properties
         userEntity.setUserEmail(signUpDTO.getUserEmail());
         userEntity.setUserName(signUpDTO.getUserName());
-        userEntity.setUserPassword(signUpDTO.getUserPassword());
+        userEntity.setUserPassword(encryptedPassword);
         userEntity.setUserRole(signUpDTO.getUserRole());
 
+        // Save the userEntity
+        iUserRepository.save(userEntity);
 
-        return  "You have been signed up successfully";
-
+        return "You have been signed up successfully";
     }
+
+
+
 
     @Override
     public Optional<UserEntity> getUserByJWT(String token) {
-        int userId = userJWT.decodeToken(token);
+        long userId = userJWT.decodeToken(token);
         System.out.println(" service" + userId);
-        return iUserRepository.findById(userId);
+        return iUserRepository.findByuserId(userId);
     }
 
 
     @Override
     public String Userlogin(LoginDTO loginDTO) {
         UserEntity userEntity = iUserRepository.findByEmailId(loginDTO.getUserEmail());
-        if(userEntity != null) {
+        if(userEntity != null && bCryptPasswordEncoder.matches(loginDTO.getUserPassword(), userEntity.getUserPassword())) {
             String token = userJWT.generateToken(userEntity.getUserId());
             return "Logged in successfully" + token;
         }else{
